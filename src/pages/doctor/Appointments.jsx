@@ -46,6 +46,9 @@ const AppointmentModal = ({ apt, onClose, onUpdate }) => {
 
   if (!apt) return null;
 
+  const isNotesDisabled =
+    apt.status !== "CONFIRMED" && apt.status !== "COMPLETED";
+
   const handleStatusUpdate = async (status) => {
     setLoading(true);
     try {
@@ -60,35 +63,53 @@ const AppointmentModal = ({ apt, onClose, onUpdate }) => {
     }
   };
 
-  const handleAddNotes = async () => {
+  const handleSaveAndComplete = async () => {
     if (!consultationNotes && !prescription && !diagnosis) {
       toast.error("Please fill at least one field");
       return;
     }
     setLoading(true);
     try {
+      // First save consultation notes
       await addConsultationNotes(apt.id, {
         consultationNotes,
         prescription,
         diagnosis,
       });
-      toast.success("Notes saved successfully");
+      // Pass consultationNotes as notes too so backend check passes
+      await updateAppointmentStatus(apt.id, {
+        status: "COMPLETED",
+        notes: consultationNotes || diagnosis || prescription, // ← add this
+      });
+      toast.success("Appointment completed successfully");
       onUpdate();
       onClose();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to save notes");
+      toast.error(err.response?.data?.message || "Failed to complete");
     } finally {
       setLoading(false);
     }
   };
-
   const handleDownloadReport = async () => {
     try {
       const res = await downloadPatientReport(apt.id);
-      const url = window.URL.createObjectURL(new Blob([res.data]));
+
+      // Get filename from response headers or use appointment id
+      const contentDisposition = res.headers["content-disposition"];
+      const filename = contentDisposition
+        ? contentDisposition.split("filename=")[1]
+        : `report-${apt.id}`;
+
+      // Detect file type
+      const contentType =
+        res.headers["content-type"] || "application/octet-stream";
+
+      const url = window.URL.createObjectURL(
+        new Blob([res.data], { type: contentType }), // ← specify type
+      );
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `report-${apt.id}`);
+      link.setAttribute("download", filename);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -116,19 +137,31 @@ const AppointmentModal = ({ apt, onClose, onUpdate }) => {
 
         {/* Tabs */}
         <div className="flex border-b border-pink-100">
-          {["details", "notes"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-3 text-sm font-medium transition-colors capitalize ${
-                activeTab === tab
-                  ? "text-purple-700 border-b-2 border-purple-500"
-                  : "text-gray-400 hover:text-gray-600"
-              }`}
-            >
-              {tab === "details" ? "Details" : "Consultation Notes"}
-            </button>
-          ))}
+          {["details", "notes"].map((tab) => {
+            const isNotesTab = tab === "notes";
+            const isDisabled = isNotesTab && isNotesDisabled;
+
+            return (
+              <button
+                key={tab}
+                onClick={() => !isDisabled && setActiveTab(tab)}
+                className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                  activeTab === tab
+                    ? "text-purple-700 border-b-2 border-purple-500"
+                    : isDisabled
+                      ? "text-gray-300 cursor-not-allowed"
+                      : "text-gray-400 hover:text-gray-600"
+                }`}
+              >
+                {tab === "details" ? "Details" : "Consultation Notes"}
+                {isDisabled && (
+                  <span className="ml-1 text-xs text-gray-300">
+                    (Confirm first)
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         <div className="p-6 space-y-4">
@@ -216,37 +249,41 @@ const AppointmentModal = ({ apt, onClose, onUpdate }) => {
                 </div>
               )}
 
-              {/* Existing consultation notes if completed */}
-              {apt.diagnosis && (
-                <div className="bg-purple-50 rounded-xl p-3">
-                  <p className="text-xs text-purple-600 font-medium mb-1">
-                    Diagnosis
-                  </p>
-                  <p className="text-sm text-gray-700">{apt.diagnosis}</p>
-                </div>
+              {/* Show existing notes if COMPLETED */}
+              {apt.status === "COMPLETED" && (
+                <>
+                  {apt.diagnosis && (
+                    <div className="bg-purple-50 rounded-xl p-3">
+                      <p className="text-xs text-purple-600 font-medium mb-1">
+                        Diagnosis
+                      </p>
+                      <p className="text-sm text-gray-700">{apt.diagnosis}</p>
+                    </div>
+                  )}
+                  {apt.consultationNotes && (
+                    <div className="bg-purple-50 rounded-xl p-3">
+                      <p className="text-xs text-purple-600 font-medium mb-1">
+                        Consultation Notes
+                      </p>
+                      <p className="text-sm text-gray-700">
+                        {apt.consultationNotes}
+                      </p>
+                    </div>
+                  )}
+                  {apt.prescription && (
+                    <div className="bg-green-50 rounded-xl p-3">
+                      <p className="text-xs text-green-600 font-medium mb-1">
+                        Prescription
+                      </p>
+                      <p className="text-sm text-gray-700">
+                        {apt.prescription}
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
 
-              {apt.consultationNotes && (
-                <div className="bg-purple-50 rounded-xl p-3">
-                  <p className="text-xs text-purple-600 font-medium mb-1">
-                    Consultation Notes
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    {apt.consultationNotes}
-                  </p>
-                </div>
-              )}
-
-              {apt.prescription && (
-                <div className="bg-green-50 rounded-xl p-3">
-                  <p className="text-xs text-green-600 font-medium mb-1">
-                    Prescription
-                  </p>
-                  <p className="text-sm text-gray-700">{apt.prescription}</p>
-                </div>
-              )}
-
-              {/* Action notes for cancel */}
+              {/* Cancel notes textarea */}
               {(apt.status === "PENDING" || apt.status === "CONFIRMED") && (
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-1">
@@ -309,61 +346,91 @@ const AppointmentModal = ({ apt, onClose, onUpdate }) => {
           ) : (
             <>
               {/* Consultation Notes Tab */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
-                    Diagnosis
-                  </label>
-                  <textarea
-                    value={diagnosis}
-                    onChange={(e) => setDiagnosis(e.target.value)}
-                    rows={3}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
-                    placeholder="Patient diagnosis..."
-                  />
+              {apt.status === "COMPLETED" ? (
+                // Read only if already completed
+                <div className="space-y-4">
+                  <p className="text-xs text-gray-400 text-center">
+                    This appointment has been completed
+                  </p>
+                  {apt.diagnosis && (
+                    <div className="bg-purple-50 rounded-xl p-3">
+                      <p className="text-xs text-purple-600 font-medium mb-1">
+                        Diagnosis
+                      </p>
+                      <p className="text-sm text-gray-700">{apt.diagnosis}</p>
+                    </div>
+                  )}
+                  {apt.consultationNotes && (
+                    <div className="bg-purple-50 rounded-xl p-3">
+                      <p className="text-xs text-purple-600 font-medium mb-1">
+                        Consultation Notes
+                      </p>
+                      <p className="text-sm text-gray-700">
+                        {apt.consultationNotes}
+                      </p>
+                    </div>
+                  )}
+                  {apt.prescription && (
+                    <div className="bg-green-50 rounded-xl p-3">
+                      <p className="text-xs text-green-600 font-medium mb-1">
+                        Prescription
+                      </p>
+                      <p className="text-sm text-gray-700">
+                        {apt.prescription}
+                      </p>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
-                    Consultation Notes
-                  </label>
-                  <textarea
-                    value={consultationNotes}
-                    onChange={(e) => setConsultationNotes(e.target.value)}
-                    rows={3}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
-                    placeholder="Notes from the consultation..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
-                    Prescription
-                  </label>
-                  <textarea
-                    value={prescription}
-                    onChange={(e) => setPrescription(e.target.value)}
-                    rows={3}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
-                    placeholder="Medicines and dosage..."
-                  />
-                </div>
+              ) : (
+                // Editable if CONFIRMED
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                      Diagnosis
+                    </label>
+                    <textarea
+                      value={diagnosis}
+                      onChange={(e) => setDiagnosis(e.target.value)}
+                      rows={3}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+                      placeholder="Patient diagnosis..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                      Consultation Notes
+                    </label>
+                    <textarea
+                      value={consultationNotes}
+                      onChange={(e) => setConsultationNotes(e.target.value)}
+                      rows={3}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+                      placeholder="Notes from the consultation..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                      Prescription
+                    </label>
+                    <textarea
+                      value={prescription}
+                      onChange={(e) => setPrescription(e.target.value)}
+                      rows={3}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+                      placeholder="Medicines and dosage..."
+                    />
+                  </div>
 
-                <div className="flex gap-2">
+                  {/* Single Save & Complete button */}
                   <button
-                    onClick={handleAddNotes}
+                    onClick={handleSaveAndComplete}
                     disabled={loading}
-                    className="flex-1 bg-purple-500 hover:bg-purple-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+                    className="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
                   >
-                    {loading ? "Saving..." : "Save Notes"}
-                  </button>
-                  <button
-                    onClick={() => handleStatusUpdate("COMPLETED")}
-                    disabled={loading}
-                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
-                  >
-                    Save & Complete
+                    {loading ? "Saving..." : "Save Notes & Complete"}
                   </button>
                 </div>
-              </div>
+              )}
             </>
           )}
         </div>
