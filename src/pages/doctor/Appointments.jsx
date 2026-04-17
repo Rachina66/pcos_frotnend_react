@@ -79,7 +79,7 @@ const AppointmentModal = ({ apt, onClose, onUpdate }) => {
       // Pass consultationNotes as notes too so backend check passes
       await updateAppointmentStatus(apt.id, {
         status: "COMPLETED",
-        notes: consultationNotes || diagnosis || prescription, // ← add this
+        notes: consultationNotes || diagnosis || prescription, 
       });
       toast.success("Appointment completed successfully");
       onUpdate();
@@ -105,7 +105,7 @@ const AppointmentModal = ({ apt, onClose, onUpdate }) => {
         res.headers["content-type"] || "application/octet-stream";
 
       const url = window.URL.createObjectURL(
-        new Blob([res.data], { type: contentType }), // ← specify type
+        new Blob([res.data], { type: contentType }), // 
       );
       const link = document.createElement("a");
       link.href = url;
