@@ -279,7 +279,7 @@ export default function Content() {
                   placeholder="Write your article content here..."
                 />
               </div>
-
+              {/* 
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">
                   Image URL (optional)
@@ -292,7 +292,7 @@ export default function Content() {
                   className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
                   placeholder="https://..."
                 />
-              </div>
+              </div> */}
 
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">

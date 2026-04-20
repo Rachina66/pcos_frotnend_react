@@ -35,15 +35,26 @@ const StatusBadge = ({ status }) => {
 };
 
 const AppointmentModal = ({ apt, onClose, onUpdate }) => {
-  const [notes, setNotes] = useState(apt?.notes || "");
-  const [consultationNotes, setConsultationNotes] = useState(
-    apt?.consultationNotes || "",
-  );
-  const [prescription, setPrescription] = useState(apt?.prescription || "");
-  const [diagnosis, setDiagnosis] = useState(apt?.diagnosis || "");
+  const [notes, setNotes] = useState("");
+  const [consultationNotes, setConsultationNotes] = useState("");
+  const [prescription, setPrescription] = useState("");
+  const [diagnosis, setDiagnosis] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("details");
+  const [expandedAssessment, setExpandedAssessment] = useState(false);
 
+  // ── Reset fields when apt changes — BEFORE early return ──
+  useEffect(() => {
+    if (!apt) return;
+    setNotes(apt.notes || "");
+    setConsultationNotes(apt.consultationNotes || "");
+    setPrescription(apt.prescription || "");
+    setDiagnosis(apt.diagnosis || "");
+    setActiveTab("details");
+    setExpandedAssessment(false);
+  }, [apt]);
+
+  // ── Early return AFTER all hooks ──
   if (!apt) return null;
 
   const isNotesDisabled =
@@ -70,16 +81,14 @@ const AppointmentModal = ({ apt, onClose, onUpdate }) => {
     }
     setLoading(true);
     try {
-      // First save consultation notes
       await addConsultationNotes(apt.id, {
         consultationNotes,
         prescription,
         diagnosis,
       });
-      // Pass consultationNotes as notes too so backend check passes
       await updateAppointmentStatus(apt.id, {
         status: "COMPLETED",
-        notes: consultationNotes || diagnosis || prescription, 
+        notes: consultationNotes || diagnosis || prescription,
       });
       toast.success("Appointment completed successfully");
       onUpdate();
@@ -90,22 +99,18 @@ const AppointmentModal = ({ apt, onClose, onUpdate }) => {
       setLoading(false);
     }
   };
+
   const handleDownloadReport = async () => {
     try {
       const res = await downloadPatientReport(apt.id);
-
-      // Get filename from response headers or use appointment id
       const contentDisposition = res.headers["content-disposition"];
       const filename = contentDisposition
         ? contentDisposition.split("filename=")[1]
         : `report-${apt.id}`;
-
-      // Detect file type
       const contentType =
         res.headers["content-type"] || "application/octet-stream";
-
       const url = window.URL.createObjectURL(
-        new Blob([res.data], { type: contentType }), // 
+        new Blob([res.data], { type: contentType }),
       );
       const link = document.createElement("a");
       link.href = url;
@@ -137,23 +142,31 @@ const AppointmentModal = ({ apt, onClose, onUpdate }) => {
 
         {/* Tabs */}
         <div className="flex border-b border-pink-100">
-          {["details", "notes"].map((tab) => {
-            const isNotesTab = tab === "notes";
-            const isDisabled = isNotesTab && isNotesDisabled;
-
+          {["details", "notes", "assessment"].map((tab) => {
+            const isDisabled = tab === "notes" && isNotesDisabled;
+            const hasNoAssessment = tab === "assessment" && !apt.prediction;
             return (
               <button
                 key={tab}
-                onClick={() => !isDisabled && setActiveTab(tab)}
+                onClick={() =>
+                  !isDisabled && !hasNoAssessment && setActiveTab(tab)
+                }
                 className={`flex-1 py-3 text-sm font-medium transition-colors ${
                   activeTab === tab
                     ? "text-purple-700 border-b-2 border-purple-500"
-                    : isDisabled
+                    : isDisabled || hasNoAssessment
                       ? "text-gray-300 cursor-not-allowed"
                       : "text-gray-400 hover:text-gray-600"
                 }`}
               >
-                {tab === "details" ? "Details" : "Consultation Notes"}
+                {tab === "details"
+                  ? "Details"
+                  : tab === "notes"
+                    ? "Consultation Notes"
+                    : "Assessment"}
+                {hasNoAssessment && (
+                  <span className="ml-1 text-xs text-gray-300">(None)</span>
+                )}
                 {isDisabled && (
                   <span className="ml-1 text-xs text-gray-300">
                     (Confirm first)
@@ -167,7 +180,6 @@ const AppointmentModal = ({ apt, onClose, onUpdate }) => {
         <div className="p-6 space-y-4">
           {activeTab === "details" ? (
             <>
-              {/* Status + date */}
               <div className="flex justify-between items-center">
                 <StatusBadge status={apt.status} />
                 <span className="text-xs text-gray-400">
@@ -228,7 +240,7 @@ const AppointmentModal = ({ apt, onClose, onUpdate }) => {
                 </div>
               )}
 
-              {/* Report file */}
+              {/* Report */}
               {apt.reportFile && (
                 <div className="bg-blue-50 rounded-xl p-3">
                   <div className="flex items-center justify-between">
@@ -249,7 +261,7 @@ const AppointmentModal = ({ apt, onClose, onUpdate }) => {
                 </div>
               )}
 
-              {/* Show existing notes if COMPLETED */}
+              {/* Completed notes display */}
               {apt.status === "COMPLETED" && (
                 <>
                   {apt.diagnosis && (
@@ -283,7 +295,7 @@ const AppointmentModal = ({ apt, onClose, onUpdate }) => {
                 </>
               )}
 
-              {/* Cancel notes textarea */}
+              {/* Notes textarea */}
               {(apt.status === "PENDING" || apt.status === "CONFIRMED") && (
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-1">
@@ -299,7 +311,7 @@ const AppointmentModal = ({ apt, onClose, onUpdate }) => {
                 </div>
               )}
 
-              {/* Action Buttons */}
+              {/* Action buttons */}
               <div className="flex gap-2 pt-2">
                 {apt.status === "PENDING" && (
                   <>
@@ -308,46 +320,213 @@ const AppointmentModal = ({ apt, onClose, onUpdate }) => {
                       disabled={loading}
                       className="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
                     >
-                      <CheckCircle size={16} />
-                      Confirm
+                      <CheckCircle size={16} /> Confirm
                     </button>
                     <button
                       onClick={() => handleStatusUpdate("CANCELLED")}
                       disabled={loading}
                       className="flex-1 flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
                     >
-                      <XCircle size={16} />
-                      Cancel
+                      <XCircle size={16} /> Cancel
                     </button>
                   </>
                 )}
-
                 {apt.status === "CONFIRMED" && (
                   <>
                     <button
                       onClick={() => setActiveTab("notes")}
                       className="flex-1 flex items-center justify-center gap-2 bg-purple-500 hover:bg-purple-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
                     >
-                      <ClipboardList size={16} />
-                      Add Notes & Complete
+                      <ClipboardList size={16} /> Add Notes & Complete
                     </button>
                     <button
                       onClick={() => handleStatusUpdate("CANCELLED")}
                       disabled={loading}
                       className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
                     >
-                      <XCircle size={16} />
-                      Cancel
+                      <XCircle size={16} /> Cancel
                     </button>
                   </>
                 )}
               </div>
             </>
+          ) : activeTab === "assessment" && apt.prediction ? (
+            <div className="space-y-4">
+              <div
+                className={`rounded-xl p-4 ${
+                  apt.prediction.riskLevel?.toLowerCase().includes("high")
+                    ? "bg-red-50 border border-red-100"
+                    : "bg-green-50 border border-green-100"
+                }`}
+              >
+                <p className="text-xs font-medium uppercase tracking-wide text-gray-400 mb-3">
+                  PCOS Assessment Summary
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-gray-400">Risk Level</p>
+                    <p
+                      className={`text-sm font-bold mt-0.5 ${
+                        apt.prediction.riskLevel?.toLowerCase().includes("high")
+                          ? "text-red-600"
+                          : "text-green-600"
+                      }`}
+                    >
+                      {apt.prediction.riskLevel}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Confidence</p>
+                    <p className="text-sm font-bold text-gray-700 mt-0.5">
+                      {apt.prediction.confidence.toFixed(1)}%
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Probability</p>
+                    <p className="text-sm font-bold text-gray-700 mt-0.5">
+                      {apt.prediction.probability.toFixed(1)}%
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Result</p>
+                    <p className="text-sm font-bold text-gray-700 mt-0.5">
+                      {apt.prediction.prediction === 1
+                        ? "PCOS Detected"
+                        : "No PCOS"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setExpandedAssessment((p) => !p)}
+                className="w-full flex items-center justify-between px-4 py-2.5 bg-purple-50 hover:bg-purple-100 rounded-xl text-sm font-medium text-purple-700 transition-colors"
+              >
+                <span>View Full Clinical Data</span>
+                <span className="text-lg leading-none">
+                  {expandedAssessment ? "−" : "+"}
+                </span>
+              </button>
+
+              {expandedAssessment && (
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                    Biometrics
+                  </p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { label: "Age", value: apt.prediction.age },
+                      { label: "Weight (kg)", value: apt.prediction.weight },
+                      { label: "Height (cm)", value: apt.prediction.height },
+                      { label: "BMI", value: apt.prediction.bmi?.toFixed(1) },
+                      {
+                        label: "Blood Group",
+                        value: apt.prediction.bloodGroup,
+                      },
+                    ].map(({ label, value }) => (
+                      <div key={label} className="bg-gray-50 rounded-lg p-2.5">
+                        <p className="text-xs text-gray-400">{label}</p>
+                        <p className="text-sm font-semibold text-gray-700 mt-0.5">
+                          {value}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-2">
+                    Cycle Info
+                  </p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      {
+                        label: "Cycle Length",
+                        value: `${apt.prediction.cycleLengthDays} days`,
+                      },
+                      {
+                        label: "Period Length",
+                        value: `${apt.prediction.periodLengthDays} days`,
+                      },
+                      {
+                        label: "Regular Ovulation",
+                        value: apt.prediction.regularOvulation ? "Yes" : "No",
+                      },
+                    ].map(({ label, value }) => (
+                      <div key={label} className="bg-gray-50 rounded-lg p-2.5">
+                        <p className="text-xs text-gray-400">{label}</p>
+                        <p className="text-sm font-semibold text-gray-700 mt-0.5">
+                          {value}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-2">
+                    Hormonal Levels
+                  </p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { label: "FSH Level", value: apt.prediction.fshLevel },
+                      { label: "LH Level", value: apt.prediction.lhLevel },
+                      {
+                        label: "Androgen",
+                        value: apt.prediction.androgenLevel,
+                      },
+                      { label: "Cyst Count", value: apt.prediction.cystCount },
+                      {
+                        label: "Hirsutism",
+                        value: apt.prediction.hirsutism ? "Yes" : "No",
+                      },
+                      {
+                        label: "Fasting Glucose",
+                        value: apt.prediction.fastingGlucose,
+                      },
+                    ].map(({ label, value }) => (
+                      <div key={label} className="bg-gray-50 rounded-lg p-2.5">
+                        <p className="text-xs text-gray-400">{label}</p>
+                        <p className="text-sm font-semibold text-gray-700 mt-0.5">
+                          {value}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-2">
+                    Lifestyle
+                  </p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      {
+                        label: "Activity Level",
+                        value: `${apt.prediction.activityLevel}/10`,
+                      },
+                      {
+                        label: "Stress Level",
+                        value: `${apt.prediction.stressLevel}/10`,
+                      },
+                      {
+                        label: "Pregnant",
+                        value: apt.prediction.pregnant ? "Yes" : "No",
+                      },
+                    ].map(({ label, value }) => (
+                      <div key={label} className="bg-gray-50 rounded-lg p-2.5">
+                        <p className="text-xs text-gray-400">{label}</p>
+                        <p className="text-sm font-semibold text-gray-700 mt-0.5">
+                          {value}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="text-xs text-gray-400 text-center pt-1">
+                    Assessment taken on{" "}
+                    {new Date(apt.prediction.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              )}
+            </div>
           ) : (
             <>
-              {/* Consultation Notes Tab */}
               {apt.status === "COMPLETED" ? (
-                // Read only if already completed
                 <div className="space-y-4">
                   <p className="text-xs text-gray-400 text-center">
                     This appointment has been completed
@@ -382,7 +561,6 @@ const AppointmentModal = ({ apt, onClose, onUpdate }) => {
                   )}
                 </div>
               ) : (
-                // Editable if CONFIRMED
                 <div className="space-y-4">
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">
@@ -420,8 +598,6 @@ const AppointmentModal = ({ apt, onClose, onUpdate }) => {
                       placeholder="Medicines and dosage..."
                     />
                   </div>
-
-                  {/* Single Save & Complete button */}
                   <button
                     onClick={handleSaveAndComplete}
                     disabled={loading}
@@ -504,6 +680,7 @@ export default function DoctorAppointments() {
                   <th className="px-5 py-3 font-medium">Time</th>
                   <th className="px-5 py-3 font-medium">Reason</th>
                   <th className="px-5 py-3 font-medium">Report</th>
+                  <th className="px-5 py-3 font-medium">Assessment</th>
                   <th className="px-5 py-3 font-medium">Status</th>
                 </tr>
               </thead>
@@ -542,6 +719,23 @@ export default function DoctorAppointments() {
                       {apt.reportFile ? (
                         <span className="px-2 py-1 bg-blue-100 text-blue-600 rounded-full text-xs font-medium">
                           Attached
+                        </span>
+                      ) : (
+                        <span className="text-gray-300 text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3">
+                      {apt.prediction ? (
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            apt.prediction.riskLevel
+                              ?.toLowerCase()
+                              .includes("high")
+                              ? "bg-red-100 text-red-600"
+                              : "bg-green-100 text-green-600"
+                          }`}
+                        >
+                          {apt.prediction.riskLevel}
                         </span>
                       ) : (
                         <span className="text-gray-300 text-xs">—</span>

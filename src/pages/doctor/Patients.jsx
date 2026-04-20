@@ -171,6 +171,7 @@ export default function DoctorPatients() {
                     onClick={() => setSelected(patient)}
                     className="hover:bg-purple-50/40 transition-colors cursor-pointer"
                   >
+                    {/* Patient */}
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
@@ -183,12 +184,26 @@ export default function DoctorPatients() {
                         </span>
                       </div>
                     </td>
+
+                    {/* Email */}
                     <td className="px-5 py-3 text-gray-500">{patient.email}</td>
+
+                    {/* Total Visits */}
                     <td className="px-5 py-3">
-                      <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
-                        {patient.totalAppointments}
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          patient.totalAppointments > 0
+                            ? "bg-purple-100 text-purple-700"
+                            : "bg-gray-100 text-gray-400"
+                        }`}
+                      >
+                        {patient.totalAppointments > 0
+                          ? patient.totalAppointments
+                          : "No visits yet"}
                       </span>
                     </td>
+
+                    {/* Last Visit */}
                     <td className="px-5 py-3 text-gray-500">
                       {patient.lastVisit ? formatDate(patient.lastVisit) : "—"}
                     </td>
