@@ -27,10 +27,10 @@ const navItems = [
 function iconBg(type) {
   const map = {
     APPOINTMENT_NEW: "bg-pink-100",
-    APPOINTMENT_CANCELLED: "bg-red-100",
-    APPOINTMENT_CONFIRMED: "bg-green-100",
-    APPOINTMENT_COMPLETED: "bg-blue-100",
-    USER_REGISTERED: "bg-blue-100",
+    APPOINTMENT_CANCELLED: "bg-pink-100",
+    APPOINTMENT_CONFIRMED: "bg-purple-100",
+    APPOINTMENT_COMPLETED: "bg-fuchsia-100",
+    USER_REGISTERED: "bg-pink-100",
     PREDICTION_NEW: "bg-purple-100",
   };
   return map[type] ?? "bg-gray-100";
@@ -39,10 +39,10 @@ function iconBg(type) {
 function iconFor(type) {
   const map = {
     APPOINTMENT_NEW: <Calendar size={16} className="text-pink-600" />,
-    APPOINTMENT_CANCELLED: <X size={16} className="text-red-500" />,
-    APPOINTMENT_CONFIRMED: <Calendar size={16} className="text-green-600" />,
-    APPOINTMENT_COMPLETED: <Calendar size={16} className="text-blue-600" />,
-    USER_REGISTERED: <Users size={16} className="text-blue-500" />,
+    APPOINTMENT_CANCELLED: <X size={16} className="text-pink-500" />,
+    APPOINTMENT_CONFIRMED: <Calendar size={16} className="text-purple-600" />,
+    APPOINTMENT_COMPLETED: <Calendar size={16} className="text-fuchsia-600" />,
+    USER_REGISTERED: <Users size={16} className="text-pink-500" />,
     PREDICTION_NEW: <Stethoscope size={16} className="text-purple-500" />,
   };
   return map[type] ?? <Bell size={16} className="text-gray-400" />;
@@ -63,10 +63,10 @@ function categoryLabel(type) {
 function categoryColor(type) {
   const map = {
     APPOINTMENT_NEW: "text-pink-400",
-    APPOINTMENT_CANCELLED: "text-red-400",
-    APPOINTMENT_CONFIRMED: "text-green-400",
-    APPOINTMENT_COMPLETED: "text-blue-400",
-    USER_REGISTERED: "text-blue-400",
+    APPOINTMENT_CANCELLED: "text-pink-400",
+    APPOINTMENT_CONFIRMED: "text-purple-400",
+    APPOINTMENT_COMPLETED: "text-fuchsia-400",
+    USER_REGISTERED: "text-pink-400",
     PREDICTION_NEW: "text-purple-400",
   };
   return map[type] ?? "text-gray-400";
@@ -95,7 +95,6 @@ export default function Sidebar() {
   const [newUsersCount, setNewUsersCount] = useState(0);
   const panelRef = useRef(null);
 
-  // Close on outside click
   useEffect(() => {
     const handler = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) {
@@ -106,15 +105,12 @@ export default function Sidebar() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Fetch live counts whenever notifications change
   useEffect(() => {
-    // Pending appointments count
     axiosClient
       .get("/admin/appointments", { params: { status: "PENDING" } })
       .then((res) => setPendingAppts(res.data?.data?.length ?? 0))
       .catch(() => {});
 
-    // New users — unread USER_REGISTERED notifications
     const unreadUserNotifs = notifications.filter(
       (n) => n.type === "USER_REGISTERED" && !n.read,
     ).length;
@@ -138,8 +134,8 @@ export default function Sidebar() {
       {/* Brand + Bell */}
       <div className="px-6 py-6 border-b border-pink-100">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-pink-200 flex items-center justify-center">
-            <span className="text-pink-700 font-bold text-sm">P</span>
+          <div className="w-9 h-9 rounded bg-purple-600 flex items-center justify-center">
+            <span className="text-white font-bold text-sm">P</span>
           </div>
           <div className="flex-1">
             <p className="text-sm font-semibold text-gray-800">PCOS Care</p>
@@ -147,11 +143,11 @@ export default function Sidebar() {
           </div>
           <button
             onClick={() => setShowNotifs((v) => !v)}
-            className="relative p-1.5 rounded-lg hover:bg-pink-50 transition-colors"
+            className="relative p-1.5 rounded hover:bg-pink-50 transition-colors"
           >
             <Bell size={18} className="text-gray-500" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}
@@ -163,7 +159,7 @@ export default function Sidebar() {
       {showNotifs && (
         <div
           ref={panelRef}
-          className="absolute left-64 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden"
+          className="absolute left-64 w-80 bg-white rounded-lg shadow-2xl border border-gray-100 z-50 overflow-hidden"
           style={{ top: "72px" }}
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
@@ -172,7 +168,7 @@ export default function Sidebar() {
                 Notifications
               </span>
               {unreadCount > 0 && (
-                <span className="bg-pink-100 text-pink-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                <span className="bg-pink-100 text-pink-700 text-xs font-bold px-2 py-0.5 rounded">
                   {unreadCount}
                 </span>
               )}
@@ -181,7 +177,7 @@ export default function Sidebar() {
               {unreadCount > 0 && (
                 <button
                   onClick={() => markAllAsRead()}
-                  className="text-xs text-pink-500 hover:text-pink-700 flex items-center gap-1"
+                  className="text-xs text-purple-500 hover:text-purple-700 flex items-center gap-1"
                 >
                   <CheckCheck size={13} />
                   Mark all read
@@ -196,7 +192,7 @@ export default function Sidebar() {
           <div className="max-h-96 overflow-y-auto divide-y divide-gray-50">
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 px-4">
-                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                <div className="w-12 h-12 rounded bg-gray-100 flex items-center justify-center mb-3">
                   <Bell size={22} className="text-gray-300" />
                 </div>
                 <p className="text-sm font-medium text-gray-400">
@@ -216,7 +212,7 @@ export default function Sidebar() {
                   }`}
                 >
                   <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${iconBg(n.type)}`}
+                    className={`w-9 h-9 rounded flex items-center justify-center flex-shrink-0 ${iconBg(n.type)}`}
                   >
                     {iconFor(n.type)}
                   </div>
@@ -261,7 +257,7 @@ export default function Sidebar() {
               to={to}
               end={to === "/admin"}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                `flex items-center gap-3 px-4 py-2.5 rounded text-sm font-medium transition-colors ${
                   isActive
                     ? "bg-pink-100 text-pink-700"
                     : "text-gray-500 hover:bg-pink-50 hover:text-pink-600"
@@ -271,7 +267,7 @@ export default function Sidebar() {
               <Icon size={18} />
               <span className="flex-1">{label}</span>
               {count > 0 && (
-                <span className="bg-pink-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                <span className="bg-purple-500 text-white text-xs font-bold px-2 py-0.5 rounded min-w-[20px] text-center">
                   {count > 99 ? "99+" : count}
                 </span>
               )}
@@ -284,7 +280,7 @@ export default function Sidebar() {
       <div className="px-3 py-4 border-t border-pink-100">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors w-full"
+          className="flex items-center gap-3 px-4 py-2.5 rounded text-sm font-medium text-gray-500 hover:bg-pink-50 hover:text-pink-600 transition-colors w-full"
         >
           <LogOut size={18} />
           Logout

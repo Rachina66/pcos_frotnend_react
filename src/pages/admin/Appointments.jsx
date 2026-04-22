@@ -2,18 +2,18 @@ import { useEffect, useState } from "react";
 import { getAllAppointments } from "../../api/adminApi";
 import toast from "react-hot-toast";
 import { formatDate } from "../../lib/utils";
-import { X, User, Stethoscope, Calendar, Clock, FileText } from "lucide-react";
+import { X, Stethoscope, Calendar, Clock, FileText } from "lucide-react";
 
 const StatusBadge = ({ status }) => {
   const styles = {
-    PENDING: "bg-amber-100 text-amber-700",
-    CONFIRMED: "bg-green-100 text-green-700",
-    COMPLETED: "bg-blue-100 text-blue-700",
-    CANCELLED: "bg-red-100 text-red-500",
+    PENDING: "bg-pink-100 text-pink-700",
+    CONFIRMED: "bg-purple-100 text-purple-700",
+    COMPLETED: "bg-fuchsia-100 text-fuchsia-700",
+    CANCELLED: "bg-gray-100 text-gray-500",
   };
   return (
     <span
-      className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || "bg-gray-100 text-gray-500"}`}
+      className={`px-2 py-1 rounded text-xs font-medium ${styles[status] || "bg-gray-100 text-gray-500"}`}
     >
       {status}
     </span>
@@ -24,7 +24,7 @@ const AppointmentModal = ({ apt, onClose }) => {
   if (!apt) return null;
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 px-4">
-      <div className="bg-white rounded-2xl w-full max-w-md">
+      <div className="bg-white rounded-lg w-full max-w-md">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-pink-100">
           <h2 className="text-base font-semibold text-gray-800">
@@ -32,7 +32,7 @@ const AppointmentModal = ({ apt, onClose }) => {
           </h2>
           <button
             onClick={onClose}
-            className="p-1.5 hover:bg-pink-50 rounded-lg transition-colors"
+            className="p-1.5 hover:bg-pink-50 rounded transition-colors"
           >
             <X size={18} className="text-gray-500" />
           </button>
@@ -49,12 +49,12 @@ const AppointmentModal = ({ apt, onClose }) => {
           </div>
 
           {/* Patient */}
-          <div className="bg-pink-50 rounded-xl p-4 space-y-1">
-            <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">
+          <div className="bg-pink-50 rounded-md p-4 space-y-1">
+            <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide">
               Patient
             </p>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-pink-200 flex items-center justify-center">
+              <div className="w-8 h-8 rounded bg-pink-200 flex items-center justify-center">
                 <span className="text-pink-700 text-xs font-bold">
                   {apt.user?.name?.charAt(0)}
                 </span>
@@ -69,12 +69,12 @@ const AppointmentModal = ({ apt, onClose }) => {
           </div>
 
           {/* Doctor */}
-          <div className="bg-purple-50 rounded-xl p-4 space-y-1">
-            <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">
+          <div className="bg-purple-50 rounded-md p-4 space-y-1">
+            <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide">
               Doctor
             </p>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center">
+              <div className="w-8 h-8 rounded bg-purple-200 flex items-center justify-center">
                 <Stethoscope size={14} className="text-purple-700" />
               </div>
               <div>
@@ -90,7 +90,7 @@ const AppointmentModal = ({ apt, onClose }) => {
 
           {/* Date & Time */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-gray-50 rounded-xl p-3">
+            <div className="bg-gray-50 rounded-md p-3">
               <div className="flex items-center gap-2 mb-1">
                 <Calendar size={14} className="text-gray-400" />
                 <p className="text-xs text-gray-400 font-medium">Date</p>
@@ -99,7 +99,7 @@ const AppointmentModal = ({ apt, onClose }) => {
                 {formatDate(apt.date)}
               </p>
             </div>
-            <div className="bg-gray-50 rounded-xl p-3">
+            <div className="bg-gray-50 rounded-md p-3">
               <div className="flex items-center gap-2 mb-1">
                 <Clock size={14} className="text-gray-400" />
                 <p className="text-xs text-gray-400 font-medium">Time</p>
@@ -112,7 +112,7 @@ const AppointmentModal = ({ apt, onClose }) => {
 
           {/* Reason */}
           {apt.reason && (
-            <div className="bg-gray-50 rounded-xl p-3">
+            <div className="bg-gray-50 rounded-md p-3">
               <div className="flex items-center gap-2 mb-1">
                 <FileText size={14} className="text-gray-400" />
                 <p className="text-xs text-gray-400 font-medium">Reason</p>
@@ -123,16 +123,16 @@ const AppointmentModal = ({ apt, onClose }) => {
 
           {/* Notes */}
           {apt.notes && (
-            <div className="bg-amber-50 rounded-xl p-3">
-              <p className="text-xs text-amber-600 font-medium mb-1">Notes</p>
+            <div className="bg-pink-50 rounded-md p-3">
+              <p className="text-xs text-pink-600 font-medium mb-1">Notes</p>
               <p className="text-sm text-gray-700">{apt.notes}</p>
             </div>
           )}
 
-          {/* Diagnosis / Prescription */}
+          {/* Diagnosis */}
           {apt.diagnosis && (
-            <div className="bg-blue-50 rounded-xl p-3">
-              <p className="text-xs text-blue-600 font-medium mb-1">
+            <div className="bg-purple-50 rounded-md p-3">
+              <p className="text-xs text-purple-600 font-medium mb-1">
                 Diagnosis
               </p>
               <p className="text-sm text-gray-700">{apt.diagnosis}</p>
@@ -140,8 +140,8 @@ const AppointmentModal = ({ apt, onClose }) => {
           )}
 
           {apt.prescription && (
-            <div className="bg-green-50 rounded-xl p-3">
-              <p className="text-xs text-green-600 font-medium mb-1">
+            <div className="bg-fuchsia-50 rounded-md p-3">
+              <p className="text-xs text-fuchsia-600 font-medium mb-1">
                 Prescription
               </p>
               <p className="text-sm text-gray-700">{apt.prescription}</p>
@@ -181,10 +181,10 @@ export default function Appointments() {
               <button
                 key={s}
                 onClick={() => setFilter(s)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
                   filter === s
-                    ? "bg-pink-500 text-white"
-                    : "bg-white text-gray-500 border border-pink-100 hover:border-pink-300"
+                    ? "bg-purple-600 text-white"
+                    : "bg-white text-gray-500 border border-pink-100 hover:border-purple-300"
                 }`}
               >
                 {s}
@@ -194,10 +194,10 @@ export default function Appointments() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-pink-100 overflow-hidden">
+      <div className="bg-white rounded-lg border border-pink-100 overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center h-48">
-            <div className="w-8 h-8 border-4 border-pink-300 border-t-pink-600 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-pink-300 border-t-purple-600 rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16 text-gray-400 text-sm">
@@ -207,13 +207,13 @@ export default function Appointments() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-pink-50">
-                <tr className="text-left text-gray-500">
-                  <th className="px-5 py-3 font-medium">Patient</th>
-                  <th className="px-5 py-3 font-medium">Doctor</th>
-                  <th className="px-5 py-3 font-medium">Date</th>
-                  <th className="px-5 py-3 font-medium">Time</th>
-                  <th className="px-5 py-3 font-medium">Reason</th>
-                  <th className="px-5 py-3 font-medium">Status</th>
+                <tr className="text-left text-gray-400">
+                  <th className="px-5 py-3 font-semibold uppercase tracking-wide text-xs">Patient</th>
+                  <th className="px-5 py-3 font-semibold uppercase tracking-wide text-xs">Doctor</th>
+                  <th className="px-5 py-3 font-semibold uppercase tracking-wide text-xs">Date</th>
+                  <th className="px-5 py-3 font-semibold uppercase tracking-wide text-xs">Time</th>
+                  <th className="px-5 py-3 font-semibold uppercase tracking-wide text-xs">Reason</th>
+                  <th className="px-5 py-3 font-semibold uppercase tracking-wide text-xs">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-pink-50">

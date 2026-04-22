@@ -23,11 +23,11 @@ const navItems = [
 function iconBg(type) {
   const map = {
     APPOINTMENT_NEW: "bg-purple-100",
-    APPOINTMENT_CANCELLED: "bg-red-100",
-    APPOINTMENT_CONFIRMED: "bg-green-100",
-    APPOINTMENT_COMPLETED: "bg-blue-100",
-    USER_REGISTERED: "bg-blue-100",
-    PREDICTION_NEW: "bg-purple-100",
+    APPOINTMENT_CANCELLED: "bg-pink-100",
+    APPOINTMENT_CONFIRMED: "bg-fuchsia-100",
+    APPOINTMENT_COMPLETED: "bg-violet-100",
+    USER_REGISTERED: "bg-purple-100",
+    PREDICTION_NEW: "bg-pink-100",
   };
   return map[type] ?? "bg-gray-100";
 }
@@ -35,11 +35,11 @@ function iconBg(type) {
 function iconFor(type) {
   const map = {
     APPOINTMENT_NEW: <Calendar size={16} className="text-purple-600" />,
-    APPOINTMENT_CANCELLED: <X size={16} className="text-red-500" />,
-    APPOINTMENT_CONFIRMED: <Calendar size={16} className="text-green-600" />,
-    APPOINTMENT_COMPLETED: <Calendar size={16} className="text-blue-600" />,
-    USER_REGISTERED: <Users size={16} className="text-blue-500" />,
-    PREDICTION_NEW: <Calendar size={16} className="text-purple-500" />,
+    APPOINTMENT_CANCELLED: <X size={16} className="text-pink-500" />,
+    APPOINTMENT_CONFIRMED: <Calendar size={16} className="text-fuchsia-600" />,
+    APPOINTMENT_COMPLETED: <Calendar size={16} className="text-violet-600" />,
+    USER_REGISTERED: <Users size={16} className="text-purple-500" />,
+    PREDICTION_NEW: <Calendar size={16} className="text-pink-500" />,
   };
   return map[type] ?? <Bell size={16} className="text-gray-400" />;
 }
@@ -59,11 +59,11 @@ function categoryLabel(type) {
 function categoryColor(type) {
   const map = {
     APPOINTMENT_NEW: "text-purple-400",
-    APPOINTMENT_CANCELLED: "text-red-400",
-    APPOINTMENT_CONFIRMED: "text-green-400",
-    APPOINTMENT_COMPLETED: "text-blue-400",
-    USER_REGISTERED: "text-blue-400",
-    PREDICTION_NEW: "text-purple-400",
+    APPOINTMENT_CANCELLED: "text-pink-400",
+    APPOINTMENT_CONFIRMED: "text-fuchsia-400",
+    APPOINTMENT_COMPLETED: "text-violet-400",
+    USER_REGISTERED: "text-purple-400",
+    PREDICTION_NEW: "text-pink-400",
   };
   return map[type] ?? "text-gray-400";
 }
@@ -90,7 +90,6 @@ export default function DoctorSidebar() {
   const [pendingCount, setPendingCount] = useState(0);
   const panelRef = useRef(null);
 
-  // Close panel on outside click
   useEffect(() => {
     const handler = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) {
@@ -101,7 +100,6 @@ export default function DoctorSidebar() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Fetch pending count whenever notifications change
   useEffect(() => {
     getDoctorAppointments({ status: "PENDING" })
       .then((res) => setPendingCount(res.data?.data?.length ?? 0))
@@ -117,14 +115,14 @@ export default function DoctorSidebar() {
   return (
     <aside className="w-64 min-h-screen bg-white border-r border-pink-100 flex flex-col relative">
       {/* Brand */}
-      <div className="px-6 py-6 border-b border-pink-100">
+      <div className="px-6 py-5 border-b border-pink-100">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-purple-200 flex items-center justify-center">
-            <span className="text-purple-700 font-bold text-sm">D</span>
+          <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center">
+            <span className="text-white font-bold text-sm">D</span>
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-800">PCOS Care</p>
-            <p className="text-xs text-purple-400">Doctor Panel</p>
+            <p className="text-sm font-bold text-gray-800 tracking-tight">PCOS Care</p>
+            <p className="text-xs text-purple-400 font-medium">Doctor Panel</p>
           </div>
         </div>
       </div>
@@ -132,24 +130,22 @@ export default function DoctorSidebar() {
       {/* Doctor Info + Bell */}
       <div className="px-6 py-4 border-b border-pink-100">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-pink-100 flex items-center justify-center">
             <span className="text-pink-600 text-xs font-bold">
               {user?.name?.charAt(0).toUpperCase()}
             </span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-gray-800 truncate">
-              {user?.name}
-            </p>
+            <p className="text-xs font-semibold text-gray-800 truncate">{user?.name}</p>
             <p className="text-xs text-gray-400 truncate">{user?.email}</p>
           </div>
           <button
             onClick={() => setShowNotifs((v) => !v)}
-            className="relative p-1.5 rounded-lg hover:bg-purple-50 transition-colors"
+            className="relative p-1.5 rounded-md hover:bg-purple-50 transition-colors"
           >
-            <Bell size={18} className="text-gray-500" />
+            <Bell size={17} className="text-gray-400" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}
@@ -161,14 +157,12 @@ export default function DoctorSidebar() {
       {showNotifs && (
         <div
           ref={panelRef}
-          className="absolute left-64 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden"
+          className="absolute left-64 w-80 bg-white rounded-lg shadow-2xl border border-pink-100 z-50 overflow-hidden"
           style={{ top: "80px" }}
         >
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-pink-50">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-gray-800 text-sm">
-                Notifications
-              </span>
+              <span className="font-semibold text-gray-800 text-sm">Notifications</span>
               {unreadCount > 0 && (
                 <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">
                   {unreadCount}
@@ -186,7 +180,7 @@ export default function DoctorSidebar() {
                 </button>
               )}
               <button onClick={() => setShowNotifs(false)}>
-                <X size={16} className="text-gray-400 hover:text-gray-600" />
+                <X size={15} className="text-gray-400 hover:text-gray-600" />
               </button>
             </div>
           </div>
@@ -194,48 +188,36 @@ export default function DoctorSidebar() {
           <div className="max-h-96 overflow-y-auto divide-y divide-gray-50">
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 px-4">
-                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-                  <Bell size={22} className="text-gray-300" />
+                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center mb-3">
+                  <Bell size={20} className="text-gray-300" />
                 </div>
-                <p className="text-sm font-medium text-gray-400">
-                  No notifications yet
-                </p>
-                <p className="text-xs text-gray-300 mt-1">
-                  You're all caught up!
-                </p>
+                <p className="text-sm font-medium text-gray-400">No notifications yet</p>
+                <p className="text-xs text-gray-300 mt-1">You're all caught up!</p>
               </div>
             ) : (
               notifications.map((n) => (
                 <div
                   key={n.id}
                   onClick={() => markAsRead(n.id)}
-                  className={`flex items-start gap-3 px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer ${
+                  className={`flex items-start gap-3 px-4 py-3 hover:bg-pink-50/40 transition-colors cursor-pointer ${
                     !n.read ? "bg-purple-50/40" : ""
                   }`}
                 >
-                  <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${iconBg(n.type)}`}
-                  >
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${iconBg(n.type)}`}>
                     {iconFor(n.type)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-1">
-                      <p
-                        className={`text-sm text-gray-800 ${!n.read ? "font-semibold" : "font-medium"}`}
-                      >
+                      <p className={`text-sm text-gray-800 ${!n.read ? "font-semibold" : "font-medium"}`}>
                         {n.title}
                       </p>
                       {!n.read && (
                         <span className="w-2 h-2 rounded-full bg-purple-500 flex-shrink-0 mt-1" />
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
-                      {n.body}
-                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{n.body}</p>
                     <div className="flex items-center gap-1.5 mt-1.5">
-                      <span className="text-[11px] text-gray-400">
-                        {timeAgo(n.createdAt)}
-                      </span>
+                      <span className="text-[11px] text-gray-400">{timeAgo(n.createdAt)}</span>
                       <span className="text-[11px] text-gray-300">•</span>
                       <span className={`text-[11px] ${categoryColor(n.type)}`}>
                         {categoryLabel(n.type)}
@@ -259,17 +241,17 @@ export default function DoctorSidebar() {
               to={to}
               end={to === "/doctor"}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
                     ? "bg-purple-100 text-purple-700"
-                    : "text-gray-500 hover:bg-purple-50 hover:text-purple-600"
+                    : "text-gray-500 hover:bg-pink-50 hover:text-pink-600"
                 }`
               }
             >
-              <Icon size={18} />
+              <Icon size={17} />
               <span className="flex-1">{label}</span>
               {count > 0 && (
-                <span className="bg-purple-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                <span className="bg-pink-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
                   {count > 99 ? "99+" : count}
                 </span>
               )}
@@ -282,9 +264,9 @@ export default function DoctorSidebar() {
       <div className="px-3 py-4 border-t border-pink-100">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors w-full"
+          className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-pink-50 hover:text-pink-600 transition-colors w-full"
         >
-          <LogOut size={18} />
+          <LogOut size={17} />
           Logout
         </button>
       </div>

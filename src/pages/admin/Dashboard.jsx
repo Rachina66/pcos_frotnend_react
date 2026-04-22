@@ -11,15 +11,11 @@ import {
 import { getStats } from "../../api/adminApi";
 import toast from "react-hot-toast";
 
-const StatCard = ({ icon: Icon, label, value, color }) => (
-  <div className="bg-white rounded-2xl p-5 border border-pink-100 flex items-center gap-4">
-    <div
-      className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}
-    >
-      <Icon size={22} />
-    </div>
+const StatCard = ({ icon: Icon, label, value }) => (
+  <div className="bg-white rounded-lg p-5 border border-pink-100 flex items-center gap-4">
+    <Icon size={22} className="text-purple-400 flex-shrink-0" />
     <div>
-      <p className="text-sm text-gray-500">{label}</p>
+      <p className="text-xs uppercase tracking-widest text-gray-400 font-medium">{label}</p>
       <p className="text-2xl font-bold text-gray-800">{value ?? "—"}</p>
     </div>
   </div>
@@ -39,7 +35,7 @@ export default function Dashboard() {
   if (loading)
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-pink-300 border-t-pink-600 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-pink-300 border-t-purple-600 rounded-full animate-spin" />
       </div>
     );
 
@@ -51,25 +47,21 @@ export default function Dashboard() {
           icon={Users}
           label="Total Users"
           value={stats?.totalUsers}
-          color="bg-pink-100 text-pink-600"
         />
         <StatCard
           icon={Stethoscope}
           label="Active Doctors"
           value={stats?.totalDoctors}
-          color="bg-purple-100 text-purple-600"
         />
         <StatCard
           icon={TrendingUp}
           label="Total Predictions"
           value={stats?.totalPredictions}
-          color="bg-blue-100 text-blue-600"
         />
         <StatCard
           icon={Calendar}
           label="Total Appointments"
           value={stats?.totalAppointments}
-          color="bg-green-100 text-green-600"
         />
       </div>
 
@@ -79,24 +71,21 @@ export default function Dashboard() {
           icon={AlertTriangle}
           label="High Risk Cases"
           value={stats?.highRiskCount}
-          color="bg-red-100 text-red-500"
         />
         <StatCard
           icon={CheckCircle}
           label="Low Risk Cases"
           value={stats?.lowRiskCount}
-          color="bg-emerald-100 text-emerald-600"
         />
         <StatCard
           icon={Clock}
           label="Pending Appointments"
           value={stats?.pendingAppointments}
-          color="bg-amber-100 text-amber-600"
         />
       </div>
 
       {/* Recent Appointments */}
-      <div className="bg-white rounded-2xl border border-pink-100 p-5">
+      <div className="bg-white rounded-lg border border-pink-100 p-5">
         <h2 className="text-base font-semibold text-gray-800 mb-4">
           Recent Appointments
         </h2>
@@ -107,10 +96,10 @@ export default function Dashboard() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-gray-400 border-b border-pink-50">
-                  <th className="pb-3 font-medium">Patient</th>
-                  <th className="pb-3 font-medium">Doctor</th>
-                  <th className="pb-3 font-medium">Date</th>
-                  <th className="pb-3 font-medium">Status</th>
+                  <th className="pb-3 font-semibold uppercase tracking-wide text-xs">Patient</th>
+                  <th className="pb-3 font-semibold uppercase tracking-wide text-xs">Doctor</th>
+                  <th className="pb-3 font-semibold uppercase tracking-wide text-xs">Date</th>
+                  <th className="pb-3 font-semibold uppercase tracking-wide text-xs">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-pink-50">
@@ -123,14 +112,14 @@ export default function Dashboard() {
                     </td>
                     <td className="py-3">
                       <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        className={`px-2 py-1 rounded text-xs font-medium ${
                           apt.status === "CONFIRMED"
-                            ? "bg-green-100 text-green-700"
+                            ? "bg-purple-100 text-purple-700"
                             : apt.status === "PENDING"
-                              ? "bg-amber-100 text-amber-700"
+                              ? "bg-pink-100 text-pink-700"
                               : apt.status === "COMPLETED"
-                                ? "bg-blue-100 text-blue-700"
-                                : "bg-red-100 text-red-700"
+                                ? "bg-fuchsia-100 text-fuchsia-700"
+                                : "bg-gray-100 text-gray-500"
                         }`}
                       >
                         {apt.status}

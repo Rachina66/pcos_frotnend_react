@@ -58,7 +58,11 @@ const empty = {
 
 const StatusBadge = ({ active }) => (
   <span
-    className={`px-2 py-1 rounded-full text-xs font-medium ${active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-500"}`}
+    className={`px-2.5 py-0.5 rounded text-xs font-semibold border ${
+      active
+        ? "bg-purple-100 text-purple-700 border-purple-200"
+        : "bg-gray-100 text-gray-500 border-gray-200"
+    }`}
   >
     {active ? "Active" : "Inactive"}
   </span>
@@ -131,13 +135,11 @@ export default function Doctors() {
         });
         toast.success("Doctor updated!");
       } else {
-        // First create the user account
         await registerDoctorAccount({
           name: form.name,
           email: form.email,
           password: form.password,
         });
-        // Then create the doctor profile
         const { password, ...doctorData } = form;
         await createDoctor({
           ...doctorData,
@@ -170,20 +172,22 @@ export default function Doctors() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500">{doctors.length} doctors found</p>
+        <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">
+          {doctors.length} doctors found
+        </p>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+          className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition-colors"
         >
-          <Plus size={16} /> Add Doctor
+          <Plus size={15} /> Add Doctor
         </button>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-pink-100 overflow-hidden">
+      <div className="bg-white rounded-lg border border-pink-100 overflow-hidden shadow-sm">
         {loading ? (
           <div className="flex items-center justify-center h-48">
-            <div className="w-8 h-8 border-4 border-pink-300 border-t-pink-600 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-pink-200 border-t-pink-500 rounded-full animate-spin" />
           </div>
         ) : doctors.length === 0 ? (
           <div className="text-center py-16 text-gray-400 text-sm">
@@ -192,21 +196,33 @@ export default function Doctors() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-pink-50">
-                <tr className="text-left text-gray-500">
-                  <th className="px-5 py-3 font-medium">Name</th>
-                  <th className="px-5 py-3 font-medium">Specialization</th>
-                  <th className="px-5 py-3 font-medium">Hospital</th>
-                  <th className="px-5 py-3 font-medium">Fee</th>
-                  <th className="px-5 py-3 font-medium">Status</th>
-                  <th className="px-5 py-3 font-medium">Actions</th>
+              <thead className="bg-purple-50 border-b border-purple-100">
+                <tr className="text-left">
+                  <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Name
+                  </th>
+                  <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Specialization
+                  </th>
+                  <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Hospital
+                  </th>
+                  <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Fee
+                  </th>
+                  <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Status
+                  </th>
+                  <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Actions
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-pink-50">
+              <tbody className="divide-y divide-gray-50">
                 {doctors.map((doc) => (
                   <tr
                     key={doc.id}
-                    className="hover:bg-pink-50/40 transition-colors"
+                    className="hover:bg-purple-50/30 transition-colors"
                   >
                     <td className="px-5 py-3">
                       <p className="font-medium text-gray-800">{doc.name}</p>
@@ -226,15 +242,15 @@ export default function Doctors() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => openEdit(doc)}
-                          className="p-1.5 rounded-lg hover:bg-pink-100 text-pink-500 transition-colors"
+                          className="p-1.5 rounded-md hover:bg-purple-100 text-purple-500 transition-colors"
                         >
-                          <Pencil size={15} />
+                          <Pencil size={14} />
                         </button>
                         <button
                           onClick={() => handleDelete(doc.id)}
-                          className="p-1.5 rounded-lg hover:bg-red-100 text-red-400 transition-colors"
+                          className="p-1.5 rounded-md hover:bg-pink-100 text-pink-500 transition-colors"
                         >
-                          <Trash2 size={15} />
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </td>
@@ -249,17 +265,17 @@ export default function Doctors() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl border border-pink-100">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-pink-100 sticky top-0 bg-white">
-              <h2 className="text-base font-semibold text-gray-800">
+              <h2 className="text-sm font-bold text-gray-800 uppercase tracking-wide">
                 {editing ? "Edit Doctor" : "Add New Doctor"}
               </h2>
               <button
                 onClick={closeModal}
-                className="p-1.5 hover:bg-pink-50 rounded-lg transition-colors"
+                className="p-1.5 hover:bg-pink-50 rounded-md transition-colors"
               >
-                <X size={18} className="text-gray-500" />
+                <X size={16} className="text-gray-400" />
               </button>
             </div>
 
@@ -267,19 +283,19 @@ export default function Doctors() {
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                  <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
                     Full Name
                   </label>
                   <input
                     required
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                    className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
                     placeholder="Enter name"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                  <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
                     Email
                   </label>
                   <input
@@ -289,13 +305,13 @@ export default function Doctors() {
                     onChange={(e) =>
                       setForm({ ...form, email: e.target.value })
                     }
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                    className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
                     placeholder="doctor@example.com"
                   />
                 </div>
                 {!editing && (
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                    <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
                       Password
                     </label>
                     <input
@@ -305,13 +321,13 @@ export default function Doctors() {
                       onChange={(e) =>
                         setForm({ ...form, password: e.target.value })
                       }
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                      className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
                       placeholder="••••••••"
                     />
                   </div>
                 )}
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                  <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
                     Specialization
                   </label>
                   <input
@@ -320,12 +336,12 @@ export default function Doctors() {
                     onChange={(e) =>
                       setForm({ ...form, specialization: e.target.value })
                     }
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                    className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
                     placeholder="Gynecologist"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                  <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
                     Qualification
                   </label>
                   <input
@@ -334,12 +350,12 @@ export default function Doctors() {
                     onChange={(e) =>
                       setForm({ ...form, qualification: e.target.value })
                     }
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                    className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
                     placeholder="MBBS, MD"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                  <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
                     Experience (years)
                   </label>
                   <input
@@ -349,12 +365,12 @@ export default function Doctors() {
                     onChange={(e) =>
                       setForm({ ...form, experience: e.target.value })
                     }
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                    className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
                     placeholder="5"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                  <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
                     Hospital
                   </label>
                   <input
@@ -363,12 +379,12 @@ export default function Doctors() {
                     onChange={(e) =>
                       setForm({ ...form, hospital: e.target.value })
                     }
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                    className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
                     placeholder="City Hospital"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                  <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
                     Location
                   </label>
                   <input
@@ -377,12 +393,12 @@ export default function Doctors() {
                     onChange={(e) =>
                       setForm({ ...form, location: e.target.value })
                     }
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                    className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
                     placeholder="Kathmandu"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                  <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
                     Phone
                   </label>
                   <input
@@ -391,12 +407,12 @@ export default function Doctors() {
                     onChange={(e) =>
                       setForm({ ...form, phone: e.target.value })
                     }
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                    className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
                     placeholder="98XXXXXXXX"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                  <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
                     Consult Fee (Rs.)
                   </label>
                   <input
@@ -406,28 +422,28 @@ export default function Doctors() {
                     onChange={(e) =>
                       setForm({ ...form, consultFee: e.target.value })
                     }
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                    className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
                     placeholder="500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
+                <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
                   Bio
                 </label>
                 <textarea
                   value={form.bio}
                   onChange={(e) => setForm({ ...form, bio: e.target.value })}
                   rows={2}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                  className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
                   placeholder="Brief description..."
                 />
               </div>
 
               {/* Available Days */}
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-2">
+                <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">
                   Available Days
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -436,10 +452,10 @@ export default function Doctors() {
                       key={day}
                       type="button"
                       onClick={() => toggleDay(day)}
-                      className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                      className={`px-3 py-1 rounded-md text-xs font-semibold border transition-colors ${
                         form.availableDays.includes(day)
                           ? "bg-pink-500 text-white border-pink-500"
-                          : "bg-white text-gray-500 border-gray-200 hover:border-pink-300"
+                          : "bg-white text-gray-500 border-gray-200 hover:border-pink-300 hover:text-pink-600"
                       }`}
                     >
                       {day.slice(0, 3)}
@@ -450,7 +466,7 @@ export default function Doctors() {
 
               {/* Time Slots */}
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-2">
+                <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">
                   Time Slots
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -459,10 +475,10 @@ export default function Doctors() {
                       key={slot}
                       type="button"
                       onClick={() => toggleSlot(slot)}
-                      className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                      className={`px-3 py-1 rounded-md text-xs font-semibold border transition-colors ${
                         form.timeSlots.includes(slot)
-                          ? "bg-purple-500 text-white border-purple-500"
-                          : "bg-white text-gray-500 border-gray-200 hover:border-purple-300"
+                          ? "bg-purple-600 text-white border-purple-600"
+                          : "bg-white text-gray-500 border-gray-200 hover:border-purple-300 hover:text-purple-600"
                       }`}
                     >
                       {slot}
@@ -473,16 +489,16 @@ export default function Doctors() {
 
               {/* Active toggle */}
               <div className="flex items-center gap-3">
-                <label className="text-xs font-medium text-gray-600">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                   Active
                 </label>
                 <button
                   type="button"
                   onClick={() => setForm({ ...form, isActive: !form.isActive })}
-                  className={`w-10 h-5 rounded-full transition-colors ${form.isActive ? "bg-pink-500" : "bg-gray-300"}`}
+                  className={`w-10 h-5 rounded-full transition-colors ${form.isActive ? "bg-purple-500" : "bg-gray-200"}`}
                 >
                   <div
-                    className={`w-4 h-4 bg-white rounded-full mx-0.5 transition-transform ${form.isActive ? "translate-x-5" : "translate-x-0"}`}
+                    className={`w-4 h-4 bg-white rounded-full mx-0.5 transition-transform shadow-sm ${form.isActive ? "translate-x-5" : "translate-x-0"}`}
                   />
                 </button>
               </div>
@@ -492,14 +508,14 @@ export default function Doctors() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="px-4 py-2 rounded-xl text-sm text-gray-500 hover:bg-gray-100 transition-colors"
+                  className="px-4 py-2 rounded-md text-sm text-gray-500 border border-gray-200 hover:bg-gray-50 transition-colors font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 rounded-xl text-sm bg-pink-500 hover:bg-pink-600 text-white font-medium transition-colors disabled:opacity-50"
+                  className="px-4 py-2 rounded-md text-sm bg-purple-600 hover:bg-purple-700 text-white font-semibold transition-colors disabled:opacity-50"
                 >
                   {saving
                     ? "Saving..."

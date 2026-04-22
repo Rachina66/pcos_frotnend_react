@@ -18,15 +18,6 @@ const CATEGORIES = [
   "LIFESTYLE",
 ];
 
-const categoryColors = {
-  PCOS_BASICS: "bg-pink-100 text-pink-700",
-  NUTRITION: "bg-green-100 text-green-700",
-  EXERCISE: "bg-blue-100 text-blue-700",
-  MENTAL_HEALTH: "bg-purple-100 text-purple-700",
-  TREATMENT: "bg-amber-100 text-amber-700",
-  LIFESTYLE: "bg-teal-100 text-teal-700",
-};
-
 const empty = {
   title: "",
   content: "",
@@ -117,17 +108,17 @@ export default function Content() {
         <p className="text-sm text-gray-500">{items.length} articles found</p>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+          className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
         >
           <Plus size={16} /> Add Content
         </button>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-pink-100 overflow-hidden">
+      <div className="bg-white rounded-lg border border-pink-100 overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center h-48">
-            <div className="w-8 h-8 border-4 border-pink-300 border-t-pink-600 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-pink-300 border-t-purple-600 rounded-full animate-spin" />
           </div>
         ) : items.length === 0 ? (
           <div className="text-center py-16 text-gray-400 text-sm">
@@ -137,13 +128,13 @@ export default function Content() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-pink-50">
-                <tr className="text-left text-gray-500">
-                  <th className="px-5 py-3 font-medium">Title</th>
-                  <th className="px-5 py-3 font-medium">Category</th>
-                  <th className="px-5 py-3 font-medium">Tags</th>
-                  <th className="px-5 py-3 font-medium">Status</th>
-                  <th className="px-5 py-3 font-medium">Created</th>
-                  <th className="px-5 py-3 font-medium">Actions</th>
+                <tr className="text-left text-gray-400">
+                  <th className="px-5 py-3 font-semibold uppercase tracking-wide text-xs">Title</th>
+                  <th className="px-5 py-3 font-semibold uppercase tracking-wide text-xs">Category</th>
+                  <th className="px-5 py-3 font-semibold uppercase tracking-wide text-xs">Tags</th>
+                  <th className="px-5 py-3 font-semibold uppercase tracking-wide text-xs">Status</th>
+                  <th className="px-5 py-3 font-semibold uppercase tracking-wide text-xs">Created</th>
+                  <th className="px-5 py-3 font-semibold uppercase tracking-wide text-xs">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-pink-50">
@@ -158,9 +149,7 @@ export default function Content() {
                       </p>
                     </td>
                     <td className="px-5 py-3">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${categoryColors[item.category]}`}
-                      >
+                      <span className="px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-700">
                         {item.category.replace("_", " ")}
                       </span>
                     </td>
@@ -169,7 +158,7 @@ export default function Content() {
                         {item.tags?.slice(0, 2).map((tag) => (
                           <span
                             key={tag}
-                            className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs"
+                            className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-xs"
                           >
                             {tag}
                           </span>
@@ -183,7 +172,7 @@ export default function Content() {
                     </td>
                     <td className="px-5 py-3">
                       <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${item.isPublished ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
+                        className={`px-2 py-1 rounded text-xs font-medium ${item.isPublished ? "bg-pink-100 text-pink-700" : "bg-gray-100 text-gray-500"}`}
                       >
                         {item.isPublished ? "Published" : "Draft"}
                       </span>
@@ -195,13 +184,13 @@ export default function Content() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => openEdit(item)}
-                          className="p-1.5 rounded-lg hover:bg-pink-100 text-pink-500 transition-colors"
+                          className="p-1.5 rounded hover:bg-pink-100 text-pink-500 transition-colors"
                         >
                           <Pencil size={15} />
                         </button>
                         <button
                           onClick={() => handleDelete(item.id)}
-                          className="p-1.5 rounded-lg hover:bg-red-100 text-red-400 transition-colors"
+                          className="p-1.5 rounded hover:bg-pink-100 text-pink-400 transition-colors"
                         >
                           <Trash2 size={15} />
                         </button>
@@ -218,14 +207,14 @@ export default function Content() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-pink-100 sticky top-0 bg-white">
               <h2 className="text-base font-semibold text-gray-800">
                 {editing ? "Edit Content" : "Add New Content"}
               </h2>
               <button
                 onClick={closeModal}
-                className="p-1.5 hover:bg-pink-50 rounded-lg transition-colors"
+                className="p-1.5 hover:bg-pink-50 rounded transition-colors"
               >
                 <X size={18} className="text-gray-500" />
               </button>
@@ -240,7 +229,7 @@ export default function Content() {
                   required
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                  className="w-full px-3 py-2 rounded border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
                   placeholder="Article title"
                 />
               </div>
@@ -254,7 +243,7 @@ export default function Content() {
                   onChange={(e) =>
                     setForm({ ...form, category: e.target.value })
                   }
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                  className="w-full px-3 py-2 rounded border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
                 >
                   {CATEGORIES.map((c) => (
                     <option key={c} value={c}>
@@ -275,24 +264,10 @@ export default function Content() {
                     setForm({ ...form, content: e.target.value })
                   }
                   rows={5}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                  className="w-full px-3 py-2 rounded border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
                   placeholder="Write your article content here..."
                 />
               </div>
-              {/* 
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Image URL (optional)
-                </label>
-                <input
-                  value={form.imageUrl}
-                  onChange={(e) =>
-                    setForm({ ...form, imageUrl: e.target.value })
-                  }
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
-                  placeholder="https://..."
-                />
-              </div> */}
 
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">
@@ -301,7 +276,7 @@ export default function Content() {
                 <input
                   value={form.tags}
                   onChange={(e) => setForm({ ...form, tags: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                  className="w-full px-3 py-2 rounded border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
                   placeholder="pcos, hormones, diet"
                 />
               </div>
@@ -315,7 +290,7 @@ export default function Content() {
                   onClick={() =>
                     setForm({ ...form, isPublished: !form.isPublished })
                   }
-                  className={`w-10 h-5 rounded-full transition-colors ${form.isPublished ? "bg-pink-500" : "bg-gray-300"}`}
+                  className={`w-10 h-5 rounded-full transition-colors ${form.isPublished ? "bg-purple-600" : "bg-gray-300"}`}
                 >
                   <div
                     className={`w-4 h-4 bg-white rounded-full mx-0.5 transition-transform ${form.isPublished ? "translate-x-5" : "translate-x-0"}`}
@@ -327,14 +302,14 @@ export default function Content() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="px-4 py-2 rounded-xl text-sm text-gray-500 hover:bg-gray-100 transition-colors"
+                  className="px-4 py-2 rounded text-sm text-gray-500 hover:bg-gray-100 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 rounded-xl text-sm bg-pink-500 hover:bg-pink-600 text-white font-medium transition-colors disabled:opacity-50"
+                  className="px-4 py-2 rounded text-sm bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors disabled:opacity-50"
                 >
                   {saving ? "Saving..." : editing ? "Update" : "Create"}
                 </button>
